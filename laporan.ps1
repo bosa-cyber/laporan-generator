@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v2.5.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v2.6.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -35,6 +35,8 @@ function Show-Help {
     Write-Host "  stats        Analisis statistik kata, halaman, gambar, dan durasi baca" -ForegroundColor Green
     Write-Host "  doctor       Audit kesehatan proyek (broken images, sitasi hilang, dll.)" -ForegroundColor Green
     Write-Host "  bundle       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip" -ForegroundColor Green
+    Write-Host "  setup        Pasang dependensi sistem otomatis Windows (Typst, Pandoc, Magick)" -ForegroundColor Green
+    Write-Host "  sync-skills  Sinkronkan skill AI agent ke Antigravity, Claude, Gemini, Grok" -ForegroundColor Green
     Write-Host "  check        Audit dependensi sistem dan struktur proyek" -ForegroundColor Green
     Write-Host "  test         Jalankan suite pengujian otomatis" -ForegroundColor Green
     Write-Host "  view         Buka dokumen Laporan.pdf di PDF viewer" -ForegroundColor Green
@@ -500,8 +502,23 @@ switch ($Command.ToLower()) {
     "init"   { Cmd-Init }
     "stats"  { Cmd-Stats }
     "doctor" { Cmd-Doctor }
-    "bundle" { Cmd-Bundle }
-    "check"  { Cmd-Check }
+    "bundle"      { Cmd-Bundle }
+    "setup"       { & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\setup-deps.ps1") }
+    "sync-skills" { 
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            node (Join-Path $PSScriptRoot "bin\laporan-generator.js") sync-hosts
+        } else {
+            Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
+        }
+    }
+    "sync-hosts"  {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            node (Join-Path $PSScriptRoot "bin\laporan-generator.js") sync-hosts
+        } else {
+            Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
+        }
+    }
+    "check"       { Cmd-Check }
     "clean"  { Cmd-Clean }
     "view"   { Cmd-View }
     "watch"  { Cmd-Watch }

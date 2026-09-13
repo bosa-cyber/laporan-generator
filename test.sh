@@ -533,6 +533,39 @@ else
 fi
 echo ""
 
+# T24: AI Agent Skills & Multi-OS Universal Installer check
+echo "[T24] AI Agent Skills, npx Tooling & Multi-OS Installer check"
+if [ -f "package.json" ] && [ -f "bin/laporan-generator.js" ]; then
+  pass "package.json dan bin/laporan-generator.js tersedia untuk npx"
+else
+  fail "package.json atau bin/laporan-generator.js tidak ditemukan"
+fi
+
+if [ -f ".agents/skills/laporan-generator/SKILL.md" ] && grep -q "Multi-Stage Interactive Protocol" .agents/skills/laporan-generator/SKILL.md; then
+  pass ".agents/skills/laporan-generator/SKILL.md valid dan memuat protokol AI"
+else
+  fail "SKILL.md tidak valid atau tidak memuat protokol AI"
+fi
+
+if [ -x "scripts/setup-deps.sh" ] && [ -f "scripts/setup-deps.ps1" ]; then
+  pass "Universal dependency installer (setup-deps.sh & setup-deps.ps1) tersedia"
+else
+  fail "Script installer dependensi tidak ditemukan"
+fi
+
+if node bin/laporan-generator.js --help | grep -q "sync-hosts"; then
+  pass "Node.js router CLI (npx laporan-generator) berfungsi dan menampilkan bantuan"
+else
+  fail "Node.js router CLI gagal dieksekusi"
+fi
+
+if grep -q "setup" laporan && grep -q "sync-skills" laporan.ps1; then
+  pass "laporan (Bash) dan laporan.ps1 (PowerShell) mendukung perintah setup & sync-skills"
+else
+  fail "laporan atau laporan.ps1 belum mendukung perintah setup/sync-skills"
+fi
+echo ""
+
 echo "========================"
 echo "Hasil: $PASS passed, $FAIL failed"
 echo "========================"

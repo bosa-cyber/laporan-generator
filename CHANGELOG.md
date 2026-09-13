@@ -6,6 +6,20 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ---
 
+## [2.6.0] - 2026-09-13
+
+### Added
+- **Multi-Host AI Agent Skills Engine (`.agents/skills/laporan-generator`)**: Memaketkan seluruh engine pembuatan karya ilmiah ke format AI Agent Skill mandiri yang kompatibel dengan Antigravity, Claude Code, Gemini CLI, dan Grok.
+- **Distribusi Instan via `npx` (`bin/laporan-generator.js`)**: Pengguna dapat langsung menjalankan `npx laporan-generator sync-hosts`, `setup`, `init`, `doctor`, dan `build` di direktori mana pun tanpa instalasi manual.
+- **Universal Multi-OS Dependency Setup (`scripts/setup-deps.sh` & `setup-deps.ps1`)**:
+  - Windows: Pemasangan hening (*silent non-interactive*) untuk Typst, Pandoc, dan ImageMagick via Winget dengan auto PATH refresh serta fallback portable zip tanpa hak administrator.
+  - Linux: Deteksi otomatis package manager (`apt`, `pacman`, `dnf`), dukungan Nix Flake (`nix develop`), dan kontainer Docker terisolasi.
+  - macOS: Dukungan Homebrew resmi.
+- **Perintah Baru pada CLI Bawaan**: Penambahan sub-command `setup` dan `sync-skills` pada `./laporan` (Bash) dan `.\laporan.ps1` (PowerShell).
+- **Kategori Uji [T24] pada Test Suite**: Menambah verifikasi integritas paket npm, file eksekutabel bin, `SKILL.md`, dan script installer multi-OS sehingga total pengujian mencapai 101 assertions lulus 100%.
+
+---
+
 ## [2.5.0] - 2026-09-07
 
 ### Added

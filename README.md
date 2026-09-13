@@ -48,12 +48,28 @@
 
 ---
 
-## AI Agent Flow (Cara Cepat)
+## AI Agent Flow (Cara Cepat via npx & Skills)
 
-Flow utama: Clone repo -> Jalankan AI Agent -> Langsung Build.
+Kamu bisa langsung menggunakan engine ini di direktori mana pun tanpa perlu clone repo:
 
 ```bash
-1. Clone repo ke folder project kamu:
+# 1. Daftarkan Skill Laporan Generator ke AI Agent kamu (Antigravity, Claude, Gemini, Grok)
+npx laporan-generator sync-hosts
+
+# 2. Pasang dependensi sistem otomatis (Typst, Pandoc, Magick)
+npx laporan-generator setup
+# Atau di Windows: .\laporan.ps1 setup
+
+# 3. Inisialisasi dokumen baru di folder saat ini
+npx laporan-generator init
+```
+
+Lalu di chat AI Agent (Antigravity / Claude Code / Gemini CLI), cukup minta:
+> *"Buatkan laporan PKL / Skripsi format ITB Bab 1-3"*
+
+Atau jika menggunakan repo lokal:
+```bash
+1. Clone repo:
      git clone https://github.com/muadzhdz/laporan-generator.git project-kamu
      cd project-kamu/
 

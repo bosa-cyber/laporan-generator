@@ -18,7 +18,7 @@ cd "$SCRIPT_DIR"
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.5.0             "
+    echo "                 LAPORAN GENERATOR CLI v2.6.0             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
@@ -37,6 +37,8 @@ show_help() {
     echo -e "  ${GREEN}stats${NC}        Analisis statistik kata, halaman, gambar, dan durasi baca"
     echo -e "  ${GREEN}doctor${NC}       Audit kesehatan proyek (broken images, sitasi hilang, dll.)"
     echo -e "  ${GREEN}bundle${NC}       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip"
+    echo -e "  ${GREEN}setup${NC}        Pasang dependensi sistem otomatis (Linux, macOS, Nix, Docker)"
+    echo -e "  ${GREEN}sync-skills${NC}  Sinkronkan skill AI agent ke Antigravity, Claude, Gemini, Grok"
     echo -e "  ${GREEN}check${NC}        Audit dependensi sistem dan struktur proyek"
     echo -e "  ${GREEN}test${NC}         Jalankan suite pengujian otomatis (test.sh)"
     echo -e "  ${GREEN}view${NC}         Buka dokumen Laporan.pdf di viewer"
@@ -408,6 +410,16 @@ case "${1:-help}" in
         ;;
     bundle)
         cmd_bundle
+        ;;
+    setup)
+        bash scripts/setup-deps.sh
+        ;;
+    sync-skills|sync-hosts)
+        if command -v node >/dev/null 2>&1; then
+            node bin/laporan-generator.js sync-hosts
+        else
+            echo "Node.js diperlukan untuk sinkronisasi multi-host AI agent."
+        fi
         ;;
     check)
         cmd_check
