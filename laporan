@@ -15,10 +15,19 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Resolve Python (handle WindowsApps stub redirector on Windows)
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -V >/dev/null 2>&1; then
+  if command -v python >/dev/null 2>&1 && python -V >/dev/null 2>&1; then
+    python3() { python "$@"; }
+    export -f python3 2>/dev/null || true
+  fi
+fi
+export PYTHONUTF8=1
+
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.6.0             "
+    echo "                 LAPORAN GENERATOR CLI v2.6.1             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
@@ -38,7 +47,8 @@ show_help() {
     echo -e "  ${GREEN}doctor${NC}       Audit kesehatan proyek (broken images, sitasi hilang, dll.)"
     echo -e "  ${GREEN}bundle${NC}       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip"
     echo -e "  ${GREEN}setup${NC}        Pasang dependensi sistem otomatis (Linux, macOS, Nix, Docker)"
-    echo -e "  ${GREEN}sync-skills${NC}  Sinkronkan skill AI agent ke Antigravity, Claude, Gemini, Grok"
+    echo -e "  ${GREEN}sync-skills${NC}  Sinkronkan skill AI agent ke Antigravity, Claude, Grok"
+    echo -e "  ${GREEN}uninstall${NC}    Hapus integrasi skill dan perintah AI agent dari seluruh sistem"
     echo -e "  ${GREEN}check${NC}        Audit dependensi sistem dan struktur proyek"
     echo -e "  ${GREEN}test${NC}         Jalankan suite pengujian otomatis (test.sh)"
     echo -e "  ${GREEN}view${NC}         Buka dokumen Laporan.pdf di viewer"
@@ -350,7 +360,7 @@ cmd_pdf() {
 cmd_docx() {
     show_banner
     echo -e "${BLUE}${BOLD}Membangun Dokumen DOCX...${NC}"
-    make docx
+    ./build-docx.sh
 }
 
 cmd_test() {
@@ -419,6 +429,13 @@ case "${1:-help}" in
             node bin/laporan-generator.js sync-hosts
         else
             echo "Node.js diperlukan untuk sinkronisasi multi-host AI agent."
+        fi
+        ;;
+    uninstall|clean-skills)
+        if command -v node >/dev/null 2>&1; then
+            node bin/laporan-generator.js uninstall
+        else
+            echo "Node.js diperlukan untuk membersihkan integrasi AI agent."
         fi
         ;;
     check)

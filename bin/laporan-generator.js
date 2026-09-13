@@ -12,13 +12,14 @@ function showHelp() {
   ========================================================
          LAPORAN GENERATOR CLI (Multi-Host AI Engine)     
   ========================================================
-  Versi: 2.6.0
+  Versi: 2.6.1
   
   Penggunaan:
     npx laporan-generator <perintah> [opsi]
 
   Perintah Utama:
-    sync-hosts        Pasang/sinkronkan AI agent skills ke Antigravity, Claude, Gemini, Grok
+    sync-hosts        Pasang/sinkronkan AI agent skills ke Antigravity, Claude, Grok
+    uninstall         Hapus/bersihkan skill dan perintah dari seluruh AI agent host
     setup             Jalankan installer dependensi otomatis multi-OS (Typst, Pandoc, ImageMagick)
     init              Inisialisasi template dokumen laporan/skripsi di direktori saat ini
     doctor            Audit kesehatan lingkungan dan dependensi dokumen
@@ -28,6 +29,10 @@ function showHelp() {
 }
 
 switch (command) {
+  case 'uninstall':
+  case 'clean-skills':
+    require('../lib/uninstall').run(args.slice(1));
+    break;
   case 'sync-hosts':
   case 'sync-skills':
     require('../lib/sync-hosts').run(args.slice(1));

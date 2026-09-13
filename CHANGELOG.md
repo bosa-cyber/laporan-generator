@@ -4,12 +4,23 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2026-09-14
+
+### Fixed
+- **Daftar Isi Dinamis DOCX (Word Native TOC Field)**: Perbaikan pembuatan Daftar Isi pada dokumen Microsoft Word (.docx) menggunakan kode bidang OpenXML asli (`w:fldSimple` / `w:instrText TOC \o "1-3" \h \z \u`) sehingga hierarki bab terdaftar rapi pada panel navigasi tanpa teks tumpang tindih.
+- **Penomoran Halaman Ganda DOCX**: Perbaikan pemisahan section break OpenXML pada dokumen Word, di mana nomor halaman pada cover disembunyikan otomatis, bagian awal (Kata Pengantar, Daftar Isi, Abstrak) menggunakan angka Romawi kecil (`i, ii, iii...`), dan bab utama (BAB I s.d. BAB V) menggunakan angka Arab (`1, 2, 3...`).
+- **Inisialisasi Proyek (`laporan init`)**: Penambahan direktori `scripts/` pada daftar penyalinan berkas agar proyek baru selalu memiliki utilitas `finalize-docx.py`, `docx-pagenum.py`, `report-stats.py`, dan `report-doctor.py`.
+- **Distribusi Paket NPM**: Pembaruan array `files` pada `package.json` dan sanitasi `.npmignore` guna memastikan seluruh 109 berkas template dan utilitas terdistribusi secara utuh tanpa berkas cache biner `.pyc`.
+
+### Changed
+- **Pembaruan Dokumentasi README**: Penyusunan ulang `README.md` berstandar industri dengan bahasa Indonesia baku, matriks perbandingan perintah CLI lintas platform, dan kepatuhan penuh terhadap zero-emoji policy.
+
 ---
 
 ## [2.6.0] - 2026-09-13
 
 ### Added
-- **Multi-Host AI Agent Skills Engine (`.agents/skills/laporan-generator`)**: Memaketkan seluruh engine pembuatan karya ilmiah ke format AI Agent Skill mandiri yang kompatibel dengan Antigravity, Claude Code, Gemini CLI, dan Grok.
+- **Multi-Host AI Agent Skills Engine (`.agents/skills/laporan-generator`)**: Memaketkan seluruh engine pembuatan karya ilmiah ke format AI Agent Skill mandiri yang kompatibel dengan Antigravity CLI, Claude Code, dan Grok.
 - **Distribusi Instan via `npx` (`bin/laporan-generator.js`)**: Pengguna dapat langsung menjalankan `npx laporan-generator sync-hosts`, `setup`, `init`, `doctor`, dan `build` di direktori mana pun tanpa instalasi manual.
 - **Universal Multi-OS Dependency Setup (`scripts/setup-deps.sh` & `setup-deps.ps1`)**:
   - Windows: Pemasangan hening (*silent non-interactive*) untuk Typst, Pandoc, dan ImageMagick via Winget dengan auto PATH refresh serta fallback portable zip tanpa hak administrator.

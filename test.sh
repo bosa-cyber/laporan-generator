@@ -7,6 +7,15 @@ FAIL=0
 pass() { PASS=$((PASS+1)); echo "  [OK] $1"; }
 fail() { FAIL=$((FAIL+1)); echo "  [FAIL] $1"; }
 
+# Resolve Python (handle WindowsApps stub redirector on Windows)
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -V >/dev/null 2>&1; then
+  if command -v python >/dev/null 2>&1 && python -V >/dev/null 2>&1; then
+    python3() { python "$@"; }
+    export -f python3 2>/dev/null || true
+  fi
+fi
+export PYTHONUTF8=1
+
 echo "=== Test Suite: Laporan Generator ==="
 echo ""
 
@@ -168,8 +177,8 @@ echo ""
 # T16: Cek kualitas DOCX export
 echo "[T16] DOCX export check"
 if command -v unzip &>/dev/null; then
-  if make docx >/dev/null 2>&1; then
-    pass "make docx sukses"
+  if ./build-docx.sh >/dev/null 2>&1 || (command -v make >/dev/null 2>&1 && make docx >/dev/null 2>&1); then
+    pass "build-docx sukses"
     if [ -f Laporan.docx ]; then
       DOCXML=$(unzip -p Laporan.docx word/document.xml 2>/dev/null)
       STYXML=$(unzip -p Laporan.docx word/styles.xml 2>/dev/null)
