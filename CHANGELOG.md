@@ -4,6 +4,19 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2] - 2026-09-14
+
+### Fixed
+- **Deteksi Python Lintas Platform di CLI (`bin/laporan-generator.js`)**: Menambahkan fungsi `getPythonCommand()` yang memeriksa `python` terlebih dahulu pada platform Windows (`win32`) sebelum `python3` guna mencegah bentrok dengan App Execution Alias stub Microsoft Store.
+- **Dukungan Terminal Encoding Windows (`scripts/report-stats.py`)**: Merekonfigurasi `sys.stdout` dan `sys.stderr` ke UTF-8 dengan mode `errors="replace"` pada Windows agar karakter visualisasi grafik batang (`■`) tidak memicu `UnicodeEncodeError: 'charmap'`.
+- **Ketahanan Fallback Test Suite PowerShell (`laporan.ps1`)**: Memeriksa ketersediaan `test.sh` sebelum memanggil Bash, dan secara cerdas mengalihkan eksekusi ke `validate-preset.py` serta unit test Python `test_scripts.py` saat berkas `test.sh` tidak ada di proyek pengguna.
+- **Kompatibilitas Universal Opsi Pandoc (`build.sh` & `laporan.ps1`)**: Mengganti opsi `--syntax-highlighting=none` dengan `--no-highlight` yang didukung secara universal oleh seluruh versi Pandoc (Pandoc 2.x/3.x) dan seluruh runner CI/CD.
+
+### Added
+- **Perluasan Unit Test Suite (`scripts/test_scripts.py`)**: Menambahkan kelas uji `TestReportStats` untuk memvalidasi parser statistik dokumen Markdown, meningkatkan total pengujian unit menjadi 16/16 lulus 100%.
+
+---
+
 ## [2.6.1] - 2026-09-14
 
 ### Fixed

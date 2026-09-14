@@ -27,7 +27,7 @@ export PYTHONUTF8=1
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.6.1             "
+    echo "                 LAPORAN GENERATOR CLI v2.6.2             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"

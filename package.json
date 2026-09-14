@@ -1,6 +1,6 @@
 {
   "name": "laporan-generator",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "description": "Universal Academic Report & Thesis Generator with Multi-Host AI Agent Skills (Antigravity, Claude, Grok)",
   "main": "bin/laporan-generator.js",
   "bin": {
@@ -29,7 +29,9 @@
     "laporan.ps1",
     "docs/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "!**/__pycache__",
+    "!**/*.pyc"
   ],
   "scripts": {
     "test": "./test.sh",
