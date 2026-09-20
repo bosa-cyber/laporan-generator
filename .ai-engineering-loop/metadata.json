@@ -1,12 +1,14 @@
 {
-  "contextVersion": "1.2.1",
-  "generatedAt": "2026-09-07T01:31:04.269Z",
-  "repositoryRevision": "bd474dae5f2dfcbadae8a4458152e43e8778e2dc",
+  "contextVersion": "1.11.1",
+  "generatedAt": "2026-09-20T10:03:20.168Z",
+  "repositoryRevision": "8c61e8b4576944b6ad8a3818a6949aee67f6cafc",
   "projectProfile": "backend-api",
-  "manifestChecksums": {},
+  "manifestChecksums": {
+    "package.json": "bcf6991e181aa391"
+  },
   "lastReconciliation": {
-    "timestamp": "2026-09-07T01:31:04.269Z",
-    "trigger": "init",
-    "impact": "INITIAL_BOOTSTRAP"
+    "timestamp": "2026-09-20T10:03:20.169Z",
+    "trigger": "refresh",
+    "impact": "DRIFT_RECONCILIATION"
   }
 }

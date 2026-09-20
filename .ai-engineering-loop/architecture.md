@@ -4,13 +4,16 @@
 Discovered architecture for laporan-generator (backend-api).
 
 ## Discovered Top-Level Directories
+- `bin/`
 - `chapters/`
 - `dist/`
 - `docs/`
 - `examples/`
 - `gambar/`
+- `lib/`
 - `presets/`
 - `scripts/`
+- `tests/`
 - `tmp/`
 
 ## Boundary Invariants
