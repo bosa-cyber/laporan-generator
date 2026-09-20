@@ -15,8 +15,17 @@ NC = "\033[0m"
 
 
 def main():
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(root)
+    pos_args = [a for a in sys.argv[1:] if not a.startswith("-")]
+
+    target_dir = os.getcwd()
+    if pos_args:
+        target_dir = os.path.abspath(pos_args[0])
+    elif not (os.path.isfile(os.path.join(target_dir, "metadata.yml")) or os.path.isdir(os.path.join(target_dir, "chapters"))):
+        pkg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if os.path.isfile(os.path.join(pkg_root, "metadata.yml")):
+            target_dir = pkg_root
+
+    os.chdir(target_dir)
 
     print(f"{CYAN}{BOLD}")
     print("  ========================================================")

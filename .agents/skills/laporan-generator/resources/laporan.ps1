@@ -9,7 +9,9 @@ param (
     [Parameter(Position=2)]
     [string]$Arg1 = "",
     [Parameter(Position=3)]
-    [string]$Arg2 = ""
+    [string]$Arg2 = "",
+    [Parameter(ValueFromRemainingArguments=$true)]
+    [string[]]$RemainingArgs
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,7 +40,7 @@ function Get-PythonCommand {
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v2.6.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v2.7.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -58,7 +60,7 @@ function Show-Help {
     Write-Host "  doctor       Audit kesehatan proyek (broken images, sitasi hilang, dll.)" -ForegroundColor Green
     Write-Host "  bundle       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip" -ForegroundColor Green
     Write-Host "  setup        Pasang dependensi sistem otomatis Windows (Typst, Pandoc, Magick)" -ForegroundColor Green
-    Write-Host "  sync-skills  Sinkronkan skill AI agent ke Antigravity, Claude, Gemini, Grok" -ForegroundColor Green
+    Write-Host "  sync-skills  Sinkronkan skill AI agent ke Antigravity, Claude, Grok" -ForegroundColor Green
     Write-Host "  check        Audit dependensi sistem dan struktur proyek" -ForegroundColor Green
     Write-Host "  test         Jalankan suite pengujian otomatis" -ForegroundColor Green
     Write-Host "  view         Buka dokumen Laporan.pdf di PDF viewer" -ForegroundColor Green
@@ -339,13 +341,20 @@ function Cmd-Test {
     Write-Host "Menjalankan Test Suite..." -ForegroundColor Blue
     $gitBash = "C:\Program Files\Git\bin\bash.exe"
     $bashCmd = if (Test-Path $gitBash) { $gitBash } elseif ((Get-Command "bash" -ErrorAction SilentlyContinue) -and (Get-Command "bash").Source -notmatch "system32\\bash\.exe") { "bash" } else { "" }
-    if ($bashCmd) {
+    if ($bashCmd -and (Test-Path "test.sh")) {
         & $bashCmd test.sh
     } else {
         $pyCmd = Get-PythonCommand
         if ($pyCmd) {
             Write-Host "Menjalankan validasi skema preset..." -ForegroundColor Blue
-            & $pyCmd scripts/validate-preset.py --all
+            if (Test-Path "scripts/validate-preset.py") {
+                & $pyCmd scripts/validate-preset.py --all
+            }
+            if (Test-Path "scripts/test_scripts.py") {
+                Write-Host ""
+                Write-Host "Menjalankan unit test skrip Python..." -ForegroundColor Blue
+                & $pyCmd scripts/test_scripts.py
+            }
         } else {
             Write-Host "Test suite membutuhkan bash atau python3." -ForegroundColor Yellow
         }
@@ -446,27 +455,30 @@ function Cmd-Clean {
 }
 
 function Cmd-Stats {
+    param([string[]]$ArgsList)
     $pyCmd = Get-PythonCommand
     if ($pyCmd) {
-        & $pyCmd scripts/report-stats.py
+        & $pyCmd scripts/report-stats.py @ArgsList
     } else {
         Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
     }
 }
 
 function Cmd-Doctor {
+    param([string[]]$ArgsList)
     $pyCmd = Get-PythonCommand
     if ($pyCmd) {
-        & $pyCmd scripts/report-doctor.py
+        & $pyCmd scripts/report-doctor.py @ArgsList
     } else {
         Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
     }
 }
 
 function Cmd-Bundle {
+    param([string[]]$ArgsList)
     $pyCmd = Get-PythonCommand
     if ($pyCmd) {
-        & $pyCmd scripts/bundle.py
+        & $pyCmd scripts/bundle.py @ArgsList
     } else {
         Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
     }
@@ -518,25 +530,59 @@ function Cmd-Watch {
     }
 }
 
+$extraArgs = @()
+if ($SubCommand) { $extraArgs += $SubCommand }
+if ($Arg1) { $extraArgs += $Arg1 }
+if ($Arg2) { $extraArgs += $Arg2 }
+if ($RemainingArgs) { $extraArgs += $RemainingArgs }
+
 switch ($Command.ToLower()) {
     "build"  { Cmd-Build }
     "pdf"    { Cmd-Build-PDF }
     "docx"   { Cmd-Build-DOCX }
     "init"   { Cmd-Init }
-    "stats"  { Cmd-Stats }
-    "doctor" { Cmd-Doctor }
-    "bundle"      { Cmd-Bundle }
-    "setup"       { & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\setup-deps.ps1") }
+    "stats"  { Cmd-Stats $extraArgs }
+    "doctor" { Cmd-Doctor $extraArgs }
+    "bundle" { Cmd-Bundle $extraArgs }
+    "setup"  { & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\setup-deps.ps1") }
+    "mcp"    {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            $mcpPath = Join-Path $PSScriptRoot "bin\mcp-server.js"
+            if (Test-Path $mcpPath) {
+                node $mcpPath @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator mcp @extraArgs
+            } else {
+                Write-Host "bin\mcp-server.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Node.js diperlukan untuk menjalankan MCP Server." -ForegroundColor Yellow
+        }
+    }
     "sync-skills" { 
         if (Get-Command "node" -ErrorAction SilentlyContinue) {
-            node (Join-Path $PSScriptRoot "bin\laporan-generator.js") sync-hosts
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath sync-hosts @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator sync-hosts @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
         } else {
             Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
         }
     }
     "sync-hosts"  {
         if (Get-Command "node" -ErrorAction SilentlyContinue) {
-            node (Join-Path $PSScriptRoot "bin\laporan-generator.js") sync-hosts
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath sync-hosts @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator sync-hosts @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
         } else {
             Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
         }

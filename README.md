@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/laporan-generator"><img src="https://img.shields.io/npm/v/laporan-generator?style=for-the-badge&color=cb3837&logo=npm" alt="npm version"></a>
+  <a href="#dukungan-model-context-protocol-mcp"><img src="https://img.shields.io/badge/MCP-Native%20Server-8A2BE2?style=for-the-badge&logo=anthropic" alt="MCP Server"></a>
   <a href="https://github.com/muadzhdz/laporan-generator/actions/workflows/build.yml"><img src="https://github.com/muadzhdz/laporan-generator/actions/workflows/build.yml/badge.svg" alt="Status Build"></a>
   <a href="#"><img src="https://img.shields.io/badge/Typst-0.13+-239DAD?style=for-the-badge&logo=typst&logoColor=white" alt="Typst"></a>
   <a href="#"><img src="https://img.shields.io/badge/Pandoc-3.0+-blue?style=for-the-badge&logo=markdown" alt="Pandoc"></a>
@@ -110,6 +111,48 @@ npx laporan-generator sync-hosts
 
 ---
 
+## Dukungan Model Context Protocol (MCP)
+
+Laporan Generator v2.7.0 dilengkapi dengan **Native MCP Server** resmi yang berjalan melalui `stdio` berbasis protokol JSON-RPC 2.0 (spesifikasi 2024-11-05). Server ini memungkinkan AI Agent otonom (seperti Google Antigravity, Claude Desktop, Claude Code, dan OpenCode) untuk berinteraksi langsung dengan dokumen akademik melalui tools deterministik.
+
+### Konfigurasi Otomatis (Direkomendasikan)
+Cukup jalankan satu perintah berikut untuk mendaftarkan skill sekaligus konfigurasi MCP Server ke seluruh agent di mesin Anda:
+```bash
+npx laporan-generator sync-hosts
+```
+
+Perintah di atas secara aman mendaftarkan server `laporan` tanpa merusak konfigurasi server lain yang sudah ada:
+* **Antigravity CLI**: `~/.gemini/config/mcp_config.json`
+* **Claude Desktop**: `~/.config/Claude/claude_desktop_config.json`
+* **Claude Code**: `~/.claude.json`
+* **OpenCode**: `~/.config/opencode/opencode.jsonc`
+
+### Konfigurasi Manual
+Jika ingin mendaftarkan server secara manual pada klien MCP apa pun:
+```json
+{
+  "mcpServers": {
+    "laporan": {
+      "command": "npx",
+      "args": ["-y", "laporan-generator", "mcp"]
+    }
+  }
+}
+```
+
+### 6 Native Tools MCP yang Disediakan
+
+| Tool Name | Deskripsi Fungsi | Parameter Utama |
+|---|---|---|
+| `laporan_init` | Menginisialisasi dokumen baru (skripsi/makalah) secara terprogram | `target_dir`, `title`, `author`, `nim`, `institution`, `preset` |
+| `laporan_doctor` | Mengaudit integritas dependensi, berkas wajib, sitasi, dan broken media | `target_dir`, `fix` (opsional) |
+| `laporan_stats` | Menghitung statistik kata, bab, karakter, dan estimasi halaman | `target_dir` |
+| `laporan_presets` | Memeriksa daftar dan detail konfigurasi preset kampus resmi | `action` (`list` / `get`), `preset_id` |
+| `laporan_citations` | Memvalidasi integritas BibTeX dan pencarian sitasi langsung ke Crossref API | `action` (`validate` / `search`), `query`, `bib_path` |
+| `laporan_build` | Mengompilasi dokumen ke PDF (Typst) dan/atau DOCX (Word) | `format` (`all` / `pdf` / `docx`), `preset` |
+
+---
+
 ## Alur Penggunaan Cepat
 
 ### Opsi A: Alur Otonom AI Agent via NPX (Direkomendasikan)
@@ -192,6 +235,7 @@ Seluruh perintah didukung secara konsisten di NPX, Linux/macOS Bash (`./laporan`
 
 | Perintah | NPX (`npx laporan-generator`) | Bash (`./laporan`) | PowerShell (`.\laporan.ps1`) | Keterangan Fungsi |
 |---|---|---|---|---|
+| `mcp` | Didukung | Didukung | Didukung | Menjalankan Model Context Protocol (MCP) Server untuk AI Agent |
 | `init` | Didukung | Didukung | Didukung | Menyalin template berkas, metadata, dan draf bab awal |
 | `sync-hosts` | Didukung | Didukung | Didukung | Memasang skill ke seluruh direktori agen AI yang terdeteksi |
 | `setup` | Didukung | Didukung | Didukung | Memasang paket sistem Typst, Pandoc, ImageMagick, dan Python |

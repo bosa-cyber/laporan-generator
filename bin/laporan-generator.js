@@ -25,23 +25,29 @@ function showHelp() {
   ========================================================
          LAPORAN GENERATOR CLI (Multi-Host AI Engine)     
   ========================================================
-  Versi: 2.6.2
+  Versi: 2.7.0
   
   Penggunaan:
     npx laporan-generator <perintah> [opsi]
 
   Perintah Utama:
-    sync-hosts        Pasang/sinkronkan AI agent skills ke Antigravity, Claude, Grok
+    mcp               Jalankan Model Context Protocol (MCP) Server untuk AI Agent
+    sync-hosts        Pasang/sinkronkan AI agent skills & MCP ke Antigravity, Claude, OpenCode
     uninstall         Hapus/bersihkan skill dan perintah dari seluruh AI agent host
     setup             Jalankan installer dependensi otomatis multi-OS (Typst, Pandoc, ImageMagick)
     init              Inisialisasi template dokumen laporan/skripsi di direktori saat ini
     doctor            Audit kesehatan lingkungan dan dependensi dokumen
+    stats             Hitung statistik komprehensif dokumen (kata, bab, estimasi halaman)
     build             Kompilasi dokumen ke PDF dan DOCX
     help              Tampilkan panduan ini
   `);
 }
 
 switch (command) {
+  case 'mcp':
+  case 'server':
+    require('../lib/mcp').start();
+    break;
   case 'uninstall':
   case 'clean-skills':
     require('../lib/uninstall').run(args.slice(1));
@@ -57,11 +63,17 @@ switch (command) {
   case 'init':
     require('../lib/init').run(args.slice(1));
     break;
+  case 'stats':
+    const statsScript = path.join(__dirname, '../scripts/report-stats.py');
+    const pyStatsCmd = getPythonCommand();
+    const statsProc = spawnSync(pyStatsCmd, [statsScript, ...args.slice(1)], { stdio: 'inherit' });
+    process.exit(statsProc.status || 0);
+    break;
   case 'doctor':
   case 'check':
     const doctorScript = path.join(__dirname, '../scripts/report-doctor.py');
     const pyCmd = getPythonCommand();
-    const proc = spawnSync(pyCmd, [doctorScript], { stdio: 'inherit' });
+    const proc = spawnSync(pyCmd, [doctorScript, ...args.slice(1)], { stdio: 'inherit' });
     process.exit(proc.status || 0);
     break;
   case 'build':

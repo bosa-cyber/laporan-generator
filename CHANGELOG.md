@@ -4,6 +4,29 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-09-20
+
+### Added
+- **Native Model Context Protocol (MCP) Server (`bin/mcp-server.js` & `lib/mcp.js`)**: Server MCP resmi berbasis protokol JSON-RPC 2.0 (stdio) yang mengekspos 6 tools otonom untuk AI Agent:
+  - `laporan_init`: Inisialisasi struktur dokumen akademik (skripsi/makalah) secara terprogram.
+  - `laporan_doctor`: Audit kesehatan lingkungan, dependensi, broken images, dan sitasi hilang dalam format JSON.
+  - `laporan_stats`: Analisis komprehensif statistik kata, bab, dan estimasi halaman dokumen.
+  - `laporan_presets`: Daftar dan inspeksi preset resmi kampus (UI, ITB, UGM, ITS, Unpad, standard 4-4-3-3).
+  - `laporan_citations`: Validasi entri BibTeX dan live query pencarian sitasi langsung ke Crossref API.
+  - `laporan_build`: Kompilasi dokumen PDF/DOCX langsung dari panggilan tool agen AI.
+- **Dukungan Output JSON Utilitas Python**: Penambahan flag `--json` dan argumen direktori target dinamis pada `scripts/report-doctor.py`, `scripts/report-stats.py`, dan `scripts/bundle.py`.
+- **Ekspor Programmatic Initialization (`lib/init.js`)**: Mengekspor fungsi `initProject(options)` untuk scaffolding dokumen tanpa interaksi terminal mentah.
+- **Integrasi Multi-Host MCP Otomatis (`lib/sync-hosts.js`)**: Perintah `npx laporan-generator sync-hosts` kini otomatis mendaftarkan MCP server `laporan` ke Antigravity (`mcp_config.json`), Claude Desktop/Code (`claude.json`), dan OpenCode (`opencode.jsonc`).
+- **Suite Pengujian Integrasi MCP (`tests/test_mcp.js`)**: 6 pengujian integrasi otomatis untuk memvalidasi inisialisasi stdio, schema list, dan eksekusi tools.
+
+### Fixed
+- **Resolusi Jalur Eksekusi MCP CLI Lintas Proyek (`laporan`)**: Penambahan fallback `npx -y laporan-generator mcp` pada skrip Bash ketika `bin/mcp-server.js` tidak berada di direktori lokal proyek pengguna.
+- **Splatting Parameter Posisi PowerShell (`laporan.ps1`)**: Penambahan akumulator `$extraArgs` yang menyatukan `$SubCommand`, `$Arg1`, `$Arg2`, dan `$RemainingArgs` sehingga flag `--json` diteruskan dengan sempurna ke `Cmd-Doctor` dan `Cmd-Stats`.
+- **Terminal Encoding Guard Windows (`scripts/report-doctor.py`)**: Rekonfigurasi stream UTF-8 dengan mode `errors="replace"` pada Windows guna mencegah `UnicodeEncodeError`.
+- **Sinkronisasi Versi Seluruh CLI**: Memperbarui seluruh banner CLI (Node.js, Bash, PowerShell) menjadi versi `v2.7.0`.
+
+---
+
 ## [2.6.2] - 2026-09-14
 
 ### Fixed

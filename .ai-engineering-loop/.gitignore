@@ -4,4 +4,8 @@ usage/
 worktrees/
 locks/
 tasks/current.diff
+tasks/draft*
 tasks/*.log
+drafts/
+studio-layouts/
+recipes/.history/

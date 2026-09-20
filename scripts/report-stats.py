@@ -2,6 +2,7 @@
 """report-stats.py: Menghitung statistik komprehensif dokumen laporan akademik."""
 
 import glob
+import json
 import os
 import re
 import sys
@@ -55,8 +56,18 @@ def count_file_stats(filepath):
 
 
 def main():
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(root)
+    json_mode = "--json" in sys.argv
+    pos_args = [a for a in sys.argv[1:] if not a.startswith("-")]
+
+    target_dir = os.getcwd()
+    if pos_args:
+        target_dir = os.path.abspath(pos_args[0])
+    elif not (os.path.isfile(os.path.join(target_dir, "metadata.yml")) or os.path.isdir(os.path.join(target_dir, "chapters"))):
+        pkg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if os.path.isfile(os.path.join(pkg_root, "metadata.yml")):
+            target_dir = pkg_root
+
+    os.chdir(target_dir)
 
     title = "Laporan Akademik"
     preset = "standard"
@@ -115,6 +126,39 @@ def main():
     if os.path.isfile("Laporan.docx"):
         sz = os.path.getsize("Laporan.docx")
         docx_size = f"{sz / 1024:.1f} KB"
+
+    if json_mode:
+        result = {
+            "title": title,
+            "preset": preset,
+            "target_dir": os.getcwd(),
+            "chapters_count": len(chapter_files),
+            "total_words": total_words,
+            "total_chars": total_chars,
+            "est_pages": est_pages,
+            "read_mins": read_mins,
+            "headings": {
+                "h1": total_h1,
+                "h2": total_h2,
+                "h3": total_h3,
+            },
+            "elements": {
+                "images": total_images,
+                "tables": total_tables,
+                "equations": total_equations,
+            },
+            "citations": {
+                "unique_cited": len(all_citations),
+                "bib_entries": bib_count,
+            },
+            "compiled_files": {
+                "pdf": pdf_size,
+                "docx": docx_size,
+            },
+            "file_breakdown": [{"filename": f, "words": c} for f, c in file_breakdown],
+        }
+        print(json.dumps(result, indent=2))
+        return
 
     print(f"{CYAN}{BOLD}")
     print("  ========================================================")

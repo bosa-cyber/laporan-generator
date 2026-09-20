@@ -2,10 +2,18 @@
 """report-doctor.py: Audit komprehensif kesehatan dan integritas proyek laporan."""
 
 import glob
+import json
 import os
 import re
 import shutil
 import sys
+
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 GREEN = "\033[0;32m"
 BLUE = "\033[0;34m"
@@ -98,101 +106,166 @@ def check_style_anomalies(markdown_files):
 
 
 def main():
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(root)
+    json_mode = "--json" in sys.argv
+    pos_args = [a for a in sys.argv[1:] if not a.startswith("-")]
 
-    print(f"{CYAN}{BOLD}")
-    print("  ========================================================")
-    print("             LAPORAN GENERATOR - DOCTOR & AUDIT SUITE     ")
-    print("  ========================================================")
-    print(f"{NC}")
+    target_dir = os.getcwd()
+    if pos_args:
+        target_dir = os.path.abspath(pos_args[0])
+    elif not (os.path.isfile(os.path.join(target_dir, "metadata.yml")) or os.path.isdir(os.path.join(target_dir, "chapters"))):
+        pkg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if os.path.isfile(os.path.join(pkg_root, "metadata.yml")):
+            target_dir = pkg_root
+
+    os.chdir(target_dir)
+
+    if not json_mode:
+        print(f"{CYAN}{BOLD}")
+        print("  ========================================================")
+        print("             LAPORAN GENERATOR - DOCTOR & AUDIT SUITE     ")
+        print("  ========================================================")
+        print(f"{NC}")
 
     errors = 0
     warnings = 0
 
     # 1. Dependensi
-    print(f"  {BLUE}{BOLD}[1/4] Audit Toolchain & Dependensi Sistem{NC}")
+    if not json_mode:
+        print(f"  {BLUE}{BOLD}[1/4] Audit Toolchain & Dependensi Sistem{NC}")
     deps, has_im = check_dependencies()
+    dep_list = []
     for cmd, name, req, found in deps:
         if "ImageMagick" in name:
             continue
-        if found:
-            print(f"    {GREEN}[OK]{NC} {name:<26}: Terpasang ({cmd})")
-        else:
-            if req:
-                print(f"    {RED}[FAIL]{NC} {name:<24}: TIDAK DITEMUKAN (Wajib)")
-                errors += 1
+        dep_list.append({"command": cmd, "name": name, "required": req, "found": found})
+        if not json_mode:
+            if found:
+                print(f"    {GREEN}[OK]{NC} {name:<26}: Terpasang ({cmd})")
             else:
-                print(f"    {YELLOW}[INFO]{NC} {name:<24}: Tidak ditemukan (Opsional)")
+                if req:
+                    print(f"    {RED}[FAIL]{NC} {name:<24}: TIDAK DITEMUKAN (Wajib)")
+                else:
+                    print(f"    {YELLOW}[INFO]{NC} {name:<24}: Tidak ditemukan (Opsional)")
+        if not found and req:
+            errors += 1
 
-    if has_im:
-        print(f"    {GREEN}[OK]{NC} {'ImageMagick':<26}: Terpasang")
-    else:
-        print(f"    {YELLOW}[INFO]{NC} {'ImageMagick':<24}: Tidak ditemukan (Opsional untuk kompresi gambar)")
-    print("")
+    dep_list.append({"command": "magick/convert", "name": "ImageMagick", "required": False, "found": has_im})
+    if not json_mode:
+        if has_im:
+            print(f"    {GREEN}[OK]{NC} {'ImageMagick':<26}: Terpasang")
+        else:
+            print(f"    {YELLOW}[INFO]{NC} {'ImageMagick':<24}: Tidak ditemukan (Opsional untuk kompresi gambar)")
+        print("")
 
     # 2. Berkas & Struktur
-    print(f"  {BLUE}{BOLD}[2/4] Audit Struktur Direktori & Berkas Wajib{NC}")
+    if not json_mode:
+        print(f"  {BLUE}{BOLD}[2/4] Audit Struktur Direktori & Berkas Wajib{NC}")
     req_files = [
         "metadata.yml", "template.typ", "reference.docx",
         "references.bib", "docx.lua", "cover.md"
     ]
+    file_status = []
     for rf in req_files:
-        if os.path.isfile(rf):
-            print(f"    {GREEN}[OK]{NC} Berkas {rf}")
-        else:
-            print(f"    {RED}[FAIL]{NC} Berkas {rf} TIDAK DITEMUKAN")
+        exists = os.path.isfile(rf)
+        file_status.append({"file": rf, "found": exists})
+        if not json_mode:
+            if exists:
+                print(f"    {GREEN}[OK]{NC} Berkas {rf}")
+            else:
+                print(f"    {RED}[FAIL]{NC} Berkas {rf} TIDAK DITEMUKAN")
+        if not exists:
             errors += 1
 
     chapter_files = sorted(glob.glob("chapters/*.md"))
-    if chapter_files:
-        print(f"    {GREEN}[OK]{NC} Direktori chapters/ ({len(chapter_files)} bab ditemukan)")
-    else:
-        print(f"    {RED}[FAIL]{NC} Tidak ada berkas markdown di chapters/")
+    if not json_mode:
+        if chapter_files:
+            print(f"    {GREEN}[OK]{NC} Direktori chapters/ ({len(chapter_files)} bab ditemukan)")
+        else:
+            print(f"    {RED}[FAIL]{NC} Tidak ada berkas markdown di chapters/")
+    if not chapter_files:
         errors += 1
-    print("")
+    if not json_mode:
+        print("")
 
     # 3. Sitasi & Referensi
-    print(f"  {BLUE}{BOLD}[3/4] Audit Sitasi & Integritas Bibliografi{NC}")
+    if not json_mode:
+        print(f"  {BLUE}{BOLD}[3/4] Audit Sitasi & Integritas Bibliografi{NC}")
     bib_keys, cited_keys, missing_keys, orphan_keys = check_citations("references.bib", chapter_files)
-    print(f"    * Total entri .bib     : {len(bib_keys)}")
-    print(f"    * Total sitasi di teks : {len(cited_keys)}")
+    if not json_mode:
+        print(f"    * Total entri .bib     : {len(bib_keys)}")
+        print(f"    * Total sitasi di teks : {len(cited_keys)}")
 
     if missing_keys:
         for k, locs in missing_keys.items():
             loc_str = ", ".join([f"{f}:{l}" for f, l in locs])
-            print(f"    {RED}[ERROR]{NC} Sitasi '@{k}' TIDAK DITEMUKAN di references.bib ({loc_str})")
+            if not json_mode:
+                print(f"    {RED}[ERROR]{NC} Sitasi '@{k}' TIDAK DITEMUKAN di references.bib ({loc_str})")
             errors += 1
-    else:
+    elif not json_mode:
         print(f"    {GREEN}[OK]{NC} Semua sitasi dalam teks valid terdaftar di references.bib")
 
     if orphan_keys:
-        print(f"    {YELLOW}[WARN]{NC} {len(orphan_keys)} entri di references.bib belum disitir dalam teks:")
-        for ok in list(orphan_keys)[:5]:
-            print(f"      - @{ok}")
-        if len(orphan_keys) > 5:
-            print(f"      - ... dan {len(orphan_keys) - 5} lainnya")
+        if not json_mode:
+            print(f"    {YELLOW}[WARN]{NC} {len(orphan_keys)} entri di references.bib belum disitir dalam teks:")
+            for ok in list(orphan_keys)[:5]:
+                print(f"      - @{ok}")
+            if len(orphan_keys) > 5:
+                print(f"      - ... dan {len(orphan_keys) - 5} lainnya")
         warnings += 1
-    print("")
+    if not json_mode:
+        print("")
 
     # 4. Gambar & Format Teks
-    print(f"  {BLUE}{BOLD}[4/4] Audit Media Citra & Anomali Tipografi{NC}")
+    if not json_mode:
+        print(f"  {BLUE}{BOLD}[4/4] Audit Media Citra & Anomali Tipografi{NC}")
     total_imgs, broken_imgs = check_images(chapter_files)
     if broken_imgs:
         for p, f, l in broken_imgs:
-            print(f"    {RED}[ERROR]{NC} Berkas gambar tidak ditemukan: '{p}' (di {f}:{l})")
+            if not json_mode:
+                print(f"    {RED}[ERROR]{NC} Berkas gambar tidak ditemukan: '{p}' (di {f}:{l})")
             errors += 1
-    else:
+    elif not json_mode:
         print(f"    {GREEN}[OK]{NC} Semua tautan gambar ({total_imgs} gambar) valid dan ada di disk")
 
     anomalies = check_style_anomalies(chapter_files)
     if anomalies:
         for f, l, msg in anomalies:
-            print(f"    {YELLOW}[WARN]{NC} {f}:{l} - {msg}")
+            if not json_mode:
+                print(f"    {YELLOW}[WARN]{NC} {f}:{l} - {msg}")
             warnings += 1
-    else:
+    elif not json_mode:
         print(f"    {GREEN}[OK]{NC} Bebas dari manual heading numbering dan box-drawing characters")
-    print("")
+    if not json_mode:
+        print("")
+
+    score = 100 if (errors == 0 and warnings == 0) else (95 if errors == 0 else max(0, 90 - errors * 15 - warnings * 5))
+    status_label = "HEALTHY" if errors == 0 and warnings == 0 else ("WARNING" if errors == 0 else "ERROR")
+
+    if json_mode:
+        result = {
+            "status": status_label,
+            "score": score,
+            "errors_count": errors,
+            "warnings_count": warnings,
+            "target_dir": os.getcwd(),
+            "dependencies": dep_list,
+            "required_files": file_status,
+            "chapters_count": len(chapter_files),
+            "chapters": [os.path.basename(c) for c in chapter_files],
+            "citations": {
+                "bib_count": len(bib_keys),
+                "cited_count": len(cited_keys),
+                "missing_keys": {k: [f"{f}:{l}" for f, l in locs] for k, locs in missing_keys.items()},
+                "orphan_keys": list(orphan_keys),
+            },
+            "images": {
+                "total": total_imgs,
+                "broken": [{"path": p, "file": f, "line": l} for p, f, l in broken_imgs],
+            },
+            "anomalies": [{"file": f, "line": l, "message": msg} for f, l, msg in anomalies],
+        }
+        print(json.dumps(result, indent=2))
+        return 1 if errors > 0 else 0
 
     # Skor Kesehatan
     print("  ========================================================")

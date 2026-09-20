@@ -330,13 +330,37 @@ STYLES = {
     <w:i/>
   </w:rPr>
 </w:style>""",
+    "TOCHeading": f"""<w:style w:type="paragraph" w:styleId="TOCHeading">
+  <w:name w:val="TOC Heading"/>
+  <w:basedOn w:val="Normal"/>
+  <w:next w:val="Normal"/>
+  <w:uiPriority w:val="39"/>
+  <w:qFormat/>
+  <w:pPr>
+    <w:spacing w:before="360" w:after="360" w:line="240" w:lineRule="auto"/>
+    <w:jc w:val="center"/>
+    <w:outlineLvl w:val="9"/>
+  </w:pPr>
+  <w:rPr>
+    {TNR}
+    <w:color w:val="000000"/>
+    <w:sz w:val="28"/>
+    <w:szCs w:val="28"/>
+    <w:b/>
+    <w:bCs/>
+  </w:rPr>
+</w:style>""",
     "TOC1": f"""<w:style w:type="paragraph" w:styleId="TOC1">
   <w:name w:val="toc 1"/>
   <w:basedOn w:val="Normal"/>
   <w:next w:val="Normal"/>
   <w:qFormat/>
   <w:pPr>
-    <w:spacing w:before="60" w:after="20" w:line="260" w:lineRule="auto"/>
+    <w:tabs>
+      <w:tab w:val="right" w:leader="dot" w:pos="9072"/>
+    </w:tabs>
+    <w:spacing w:before="120" w:after="40" w:line="260" w:lineRule="auto"/>
+    <w:ind w:left="0" w:right="0"/>
     <w:jc w:val="left"/>
   </w:pPr>
   <w:rPr>
@@ -354,10 +378,18 @@ STYLES = {
   <w:next w:val="Normal"/>
   <w:qFormat/>
   <w:pPr>
-    <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
+    <w:tabs>
+      <w:tab w:val="right" w:leader="dot" w:pos="9072"/>
+    </w:tabs>
+    <w:spacing w:before="20" w:after="20" w:line="240" w:lineRule="auto"/>
+    <w:ind w:left="360" w:right="0"/>
     <w:jc w:val="left"/>
   </w:pPr>
   <w:rPr>
+    {TNR}
+    <w:color w:val="000000"/>
+    <w:sz w:val="24"/>
+    <w:szCs w:val="24"/>
     <w:b w:val="0"/>
     <w:bCs w:val="0"/>
   </w:rPr>
@@ -368,10 +400,18 @@ STYLES = {
   <w:next w:val="Normal"/>
   <w:qFormat/>
   <w:pPr>
+    <w:tabs>
+      <w:tab w:val="right" w:leader="dot" w:pos="9072"/>
+    </w:tabs>
     <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
+    <w:ind w:left="720" w:right="0"/>
     <w:jc w:val="left"/>
   </w:pPr>
   <w:rPr>
+    {TNR}
+    <w:color w:val="000000"/>
+    <w:sz w:val="24"/>
+    <w:szCs w:val="24"/>
     <w:b w:val="0"/>
     <w:bCs w:val="0"/>
   </w:rPr>

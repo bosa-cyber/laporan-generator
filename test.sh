@@ -575,6 +575,33 @@ else
 fi
 echo ""
 
+# T25: Native Model Context Protocol (MCP) Server check
+echo "[T25] Native Model Context Protocol (MCP) Server check"
+if [ -f "bin/mcp-server.js" ] && [ -f "lib/mcp.js" ]; then
+  pass "MCP Server files (bin/mcp-server.js & lib/mcp.js) tersedia"
+else
+  fail "MCP Server files tidak lengkap"
+fi
+
+if node bin/laporan-generator.js --help | grep -q "mcp"; then
+  pass "CLI router npx laporan-generator mendukung perintah mcp"
+else
+  fail "CLI router belum mendukung perintah mcp"
+fi
+
+if grep -q "mcp" laporan && grep -q "mcp" laporan.ps1; then
+  pass "laporan (Bash) dan laporan.ps1 (PowerShell) mendukung perintah mcp"
+else
+  fail "laporan atau laporan.ps1 belum mendukung perintah mcp"
+fi
+
+if node tests/test_mcp.js >/dev/null 2>&1; then
+  pass "MCP Server integration test suite lulus 100% (tests/test_mcp.js)"
+else
+  fail "MCP Server integration test gagal"
+fi
+echo ""
+
 echo "========================"
 echo "Hasil: $PASS passed, $FAIL failed"
 echo "========================"

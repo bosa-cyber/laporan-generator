@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """test_scripts.py: Automated unit tests for Laporan Generator Python helper scripts."""
 
+import json
 import os
+import subprocess
 import sys
 import unittest
 
@@ -36,16 +38,39 @@ class TestScanPreset(unittest.TestCase):
         self.assertIn("UNIVERSITAS INDONESIA", inst)
 
 
+def get_presets_dir():
+    for c in [
+        os.path.join(ROOT_DIR, "presets"),
+        os.path.join(ROOT_DIR, "resources", "presets"),
+        os.path.join(ROOT_DIR, "..", "..", "..", "presets"),
+    ]:
+        if os.path.isdir(c):
+            return os.path.abspath(c)
+    return os.path.join(ROOT_DIR, "presets")
+
+
+def get_project_root():
+    for c in [
+        ROOT_DIR,
+        os.path.join(ROOT_DIR, "resources"),
+        os.path.join(ROOT_DIR, "..", "..", ".."),
+    ]:
+        if os.path.isfile(os.path.join(c, "metadata.yml")):
+            return os.path.abspath(c)
+    return ROOT_DIR
+
+
 class TestValidatePreset(unittest.TestCase):
     def test_parse_simple_yaml(self):
-        test_yaml = os.path.join(ROOT_DIR, "presets", "standard.yml")
+        presets_dir = get_presets_dir()
+        test_yaml = os.path.join(presets_dir, "standard.yml")
         self.assertTrue(os.path.exists(test_yaml))
         data = validate_preset.parse_simple_yaml(test_yaml)
         self.assertEqual(data.get("preset_id"), "standard")
         self.assertEqual(data.get("margin_top"), "2cm")
 
     def test_validate_all_presets(self):
-        presets_dir = os.path.join(ROOT_DIR, "presets")
+        presets_dir = get_presets_dir()
         for f in os.listdir(presets_dir):
             if f.endswith(".yml"):
                 path = os.path.join(presets_dir, f)
@@ -121,6 +146,42 @@ class TestFinalizeDocx(unittest.TestCase):
         self.assertIn('w:pos="7937"', res)
         self.assertIn('w:left="360"', res)
         self.assertIn('w:left="720"', res)
+
+
+report_stats = __import__("report-stats")
+
+
+class TestReportStats(unittest.TestCase):
+    def test_count_file_stats_structure(self):
+        sample_md = os.path.join(get_project_root(), "cover.md")
+        if os.path.exists(sample_md):
+            stats = report_stats.count_file_stats(sample_md)
+            self.assertIsInstance(stats, dict)
+            self.assertIsInstance(stats["words"], int)
+            self.assertIsInstance(stats["chars"], int)
+            self.assertGreaterEqual(stats["words"], 0)
+
+    def test_json_stats_execution(self):
+        proj_root = get_project_root()
+        cmd = [sys.executable, os.path.join(SCRIPTS_DIR, "report-stats.py"), proj_root, "--json"]
+        proc = subprocess.run(cmd, capture_output=True, text=True, cwd=proj_root)
+        self.assertEqual(proc.returncode, 0)
+        data = json.loads(proc.stdout)
+        self.assertIn("total_words", data)
+        self.assertIn("preset", data)
+        self.assertIn("target_dir", data)
+
+
+class TestReportDoctor(unittest.TestCase):
+    def test_json_doctor_execution(self):
+        proj_root = get_project_root()
+        cmd = [sys.executable, os.path.join(SCRIPTS_DIR, "report-doctor.py"), proj_root, "--json"]
+        proc = subprocess.run(cmd, capture_output=True, text=True, cwd=proj_root)
+        data = json.loads(proc.stdout)
+        self.assertIn("status", data)
+        self.assertIn("dependencies", data)
+        self.assertIn("required_files", data)
+        self.assertIn("citations", data)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,12 @@
 {
   "name": "laporan-generator",
-  "version": "2.6.2",
-  "description": "Universal Academic Report & Thesis Generator with Multi-Host AI Agent Skills (Antigravity, Claude, Grok)",
+  "version": "2.7.0",
+  "description": "Universal Academic Report & Thesis Generator with Multi-Host AI Agent Skills & Native MCP Server",
   "main": "bin/laporan-generator.js",
   "bin": {
     "laporan-generator": "bin/laporan-generator.js",
-    "laporan": "bin/laporan-generator.js"
+    "laporan": "bin/laporan-generator.js",
+    "laporan-mcp": "bin/mcp-server.js"
   },
   "files": [
     "bin/",
@@ -35,7 +36,10 @@
   ],
   "scripts": {
     "test": "./test.sh",
+    "test:mcp": "node tests/test_mcp.js",
+    "mcp": "node bin/mcp-server.js",
     "doctor": "node bin/laporan-generator.js doctor",
+    "stats": "node bin/laporan-generator.js stats",
     "sync-hosts": "node bin/laporan-generator.js sync-hosts",
     "setup": "node bin/laporan-generator.js setup"
   },
@@ -46,6 +50,8 @@
     "thesis-generator",
     "skripsi",
     "ai-agents",
+    "mcp",
+    "model-context-protocol",
     "antigravity",
     "antigravity-cli",
     "claude-code",
